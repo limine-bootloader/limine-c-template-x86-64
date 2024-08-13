@@ -1,9 +1,9 @@
 # Nuke built-in rules and variables.
 override MAKEFLAGS += -rR
 
-# This is the name that our final kernel executable will have.
+# This is the name that our final executable will have.
 # Change as needed.
-override KERNEL := kernel
+override OUTPUT := kernel
 
 # Convenience macro to reliably declare user overridable variables.
 define DEFAULT_VAR =
@@ -15,13 +15,11 @@ define DEFAULT_VAR =
     endif
 endef
 
-# It is suggested to use a custom built cross toolchain to build a kernel.
-# We are using the standard "cc" here, it may work by using
-# the host system's toolchain, but this is not guaranteed.
+# User controllable C compiler command.
 override DEFAULT_KCC := cc
 $(eval $(call DEFAULT_VAR,KCC,$(DEFAULT_KCC)))
 
-# Same thing for "ld" (the linker).
+# User controllable linker command.
 override DEFAULT_KLD := ld
 $(eval $(call DEFAULT_VAR,KLD,$(DEFAULT_KLD)))
 
@@ -71,6 +69,11 @@ override KCPPFLAGS := \
     -MMD \
     -MP
 
+# Internal nasm flags that should not be changed by the user.
+override KNASMFLAGS += \
+    -Wall \
+    -f elf64
+
 # Internal linker flags that should not be changed by the user.
 override KLDFLAGS += \
     -m elf_x86_64 \
@@ -80,16 +83,11 @@ override KLDFLAGS += \
     -gc-sections \
     -T linker.ld
 
-# Internal nasm flags that should not be changed by the user.
-override KNASMFLAGS += \
-    -Wall \
-    -f elf64
-
 # Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
-override CFILES := $(shell cd src && find -L * -type f -name '*.c')
-override ASFILES := $(shell cd src && find -L * -type f -name '*.S')
-override NASMFILES := $(shell cd src && find -L * -type f -name '*.asm')
+override CFILES := $(shell cd src && find -L * -type f -name '*.c' | LC_ALL=C sort)
+override ASFILES := $(shell cd src && find -L * -type f -name '*.S' | LC_ALL=C sort)
+override NASMFILES := $(shell cd src && find -L * -type f -name '*.asm' | LC_ALL=C sort)
 override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
@@ -101,10 +99,10 @@ endif
 
 # Default target.
 .PHONY: all
-all: bin/$(KERNEL)
+all: bin/$(OUTPUT)
 
-# Link rules for the final kernel executable.
-bin/$(KERNEL): GNUmakefile linker.ld $(OBJ)
+# Link rules for the final executable.
+bin/$(OUTPUT): GNUmakefile linker.ld $(OBJ)
 	mkdir -p "$$(dirname $@)"
 	$(KLD) $(OBJ) $(KLDFLAGS) -o $@
 
@@ -131,11 +129,13 @@ obj/%.asm.o: src/%.asm GNUmakefile
 clean:
 	rm -rf bin obj
 
+# Remove everything built and generated including downloaded dependencies.
 .PHONY: distclean
 distclean: clean
 	rm -rf freestanding-headers src/cc-runtime.c src/limine.h
 
+# Install the final built executable to its final on-root location.
 .PHONY: install
 install: all
-	install -d "$(DESTDIR)$(PREFIX)/share/$(KERNEL)"
-	install -m 644 bin/$(KERNEL) "$(DESTDIR)$(PREFIX)/share/$(KERNEL)/"
+	install -d "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
+	install -m 644 bin/$(OUTPUT) "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/"
