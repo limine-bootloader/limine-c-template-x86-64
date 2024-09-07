@@ -9,6 +9,12 @@ override OUTPUT := kernel
 # Convenience macro to reliably declare user overridable variables.
 override USER_VARIABLE = $(if $(filter $(origin $(1)),default undefined),$(eval override $(1) := $(2)))
 
+# Destination directory on install (should always be empty by default).
+$(call USER_VARIABLE,DESTDIR,)
+
+# Install prefix; /usr/local is a good, standard default pick.
+$(call USER_VARIABLE,PREFIX,/usr/local)
+
 # User controllable C compiler command.
 $(call USER_VARIABLE,KCC,cc)
 
@@ -127,3 +133,9 @@ distclean: clean
 install: all
 	install -d "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
 	install -m 644 bin/$(OUTPUT) "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/"
+
+# Try to undo whatever the "install" target did.
+.PHONY: uninstall
+uninstall:
+	rm -f "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/$(OUTPUT)"
+	-rmdir "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
