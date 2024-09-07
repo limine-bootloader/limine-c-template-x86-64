@@ -53,7 +53,7 @@ override KCFLAGS += \
 override KCPPFLAGS := \
     -I src \
     $(KCPPFLAGS) \
-    -isystem freestanding-headers \
+    -isystem freestnd-c-hdrs/x86_64/include \
     -MMD \
     -MP
 
@@ -80,7 +80,7 @@ override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILE
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
 # Ensure the dependencies have been obtained.
-override MISSING_DEPS := $(shell if ! test -d freestanding-headers || ! test -f src/cc-runtime.c || ! test -f src/limine.h; then echo 1; fi)
+override MISSING_DEPS := $(shell if ! test -d freestnd-c-hdrs || ! test -f src/cc-runtime.c || ! test -f src/limine.h; then echo 1; fi)
 ifeq ($(MISSING_DEPS),1)
     $(error Please run the ./get-deps script first)
 endif
@@ -120,7 +120,7 @@ clean:
 # Remove everything built and generated including downloaded dependencies.
 .PHONY: distclean
 distclean: clean
-	rm -rf freestanding-headers src/cc-runtime.c src/limine.h
+	rm -rf freestnd-c-hdrs src/cc-runtime.c src/limine.h
 
 # Install the final built executable to its final on-root location.
 .PHONY: install
