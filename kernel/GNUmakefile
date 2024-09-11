@@ -33,6 +33,13 @@ $(call USER_VARIABLE,KNASMFLAGS,-F dwarf -g)
 # User controllable linker flags. We set none by default.
 $(call USER_VARIABLE,KLDFLAGS,)
 
+# Ensure the dependencies have been obtained.
+ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean ) && echo 1),1)
+    ifeq ($(shell ( ! test -d freestanding-headers || ! test -f src/cc-runtime.c || ! test -f src/limine.h ) && echo 1),1)
+        $(error Please run the ./get-deps script first)
+    endif
+endif
+
 # Internal C flags that should not be changed by the user.
 override KCFLAGS += \
     -Wall \
@@ -84,12 +91,6 @@ override ASFILES := $(shell cd src && find -L * -type f -name '*.S' | LC_ALL=C s
 override NASMFILES := $(shell cd src && find -L * -type f -name '*.asm' | LC_ALL=C sort)
 override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
-
-# Ensure the dependencies have been obtained.
-override MISSING_DEPS := $(shell if ! test -d freestanding-headers || ! test -f src/cc-runtime.c || ! test -f src/limine.h; then echo 1; fi)
-ifeq ($(MISSING_DEPS),1)
-    $(error Please run the ./get-deps script first)
-endif
 
 # Default target.
 .PHONY: all
