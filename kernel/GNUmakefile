@@ -35,7 +35,7 @@ $(call USER_VARIABLE,KLDFLAGS,)
 
 # Ensure the dependencies have been obtained.
 ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = distclean ) && echo 1),1)
-    ifeq ($(shell ( ! test -d freestanding-headers || ! test -f src/cc-runtime.c || ! test -f src/limine.h ) && echo 1),1)
+    ifeq ($(shell ( ! test -d freestnd-c-hdrs-0bsd || ! test -f src/cc-runtime.c || ! test -f src/limine.h ) && echo 1),1)
         $(error Please run the ./get-deps script first)
     endif
 endif
@@ -66,7 +66,7 @@ override KCFLAGS += \
 override KCPPFLAGS := \
     -I src \
     $(KCPPFLAGS) \
-    -isystem freestanding-headers \
+    -isystem freestnd-c-hdrs-0bsd \
     -MMD \
     -MP
 
@@ -127,7 +127,7 @@ clean:
 # Remove everything built and generated including downloaded dependencies.
 .PHONY: distclean
 distclean: clean
-	rm -rf freestanding-headers src/cc-runtime.c src/limine.h
+	rm -rf freestnd-c-hdrs-0bsd src/cc-runtime.c src/limine.h
 
 # Install the final built executable to its final on-root location.
 .PHONY: install
