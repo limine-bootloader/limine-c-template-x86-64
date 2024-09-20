@@ -41,7 +41,7 @@ ifneq ($(shell ( test '$(MAKECMDGOALS)' = clean || test '$(MAKECMDGOALS)' = dist
 endif
 
 # Check if KCC is Clang.
-override KCC_IS_CLANG := $(shell ! $(KCC) --version | grep 'clang' >/dev/null 2>&1; echo $$?)
+override KCC_IS_CLANG := $(shell ! $(KCC) --version 2>/dev/null | grep 'clang' >/dev/null 2>&1; echo $$?)
 
 # If the C compiler is Clang, set the target as needed.
 ifeq ($(KCC_IS_CLANG),1)
