@@ -9,8 +9,8 @@ override OUTPUT := kernel
 PREFIX := /usr/local
 
 # User controllable toolchain and toolchain prefix.
-TOOLCHAIN :=
-TOOLCHAIN_PREFIX :=
+TOOLCHAIN := 
+TOOLCHAIN_PREFIX := 
 ifneq ($(TOOLCHAIN),)
     ifeq ($(TOOLCHAIN_PREFIX),)
         TOOLCHAIN_PREFIX := $(TOOLCHAIN)-
@@ -21,7 +21,7 @@ endif
 ifneq ($(TOOLCHAIN_PREFIX),)
     CC := $(TOOLCHAIN_PREFIX)gcc
 else
-    CC := cc
+    CC := gcc
 endif
 
 # User controllable linker command.
@@ -40,7 +40,7 @@ CFLAGS := -g -O2 -pipe
 CPPFLAGS :=
 
 # User controllable nasm flags.
-NASMFLAGS := -g
+NASMFLAGS := -g -w-reloc-abs-qword -w-reloc-rel-dword
 
 # User controllable linker flags. We set none by default.
 LDFLAGS :=
@@ -96,8 +96,8 @@ override CPPFLAGS := \
 # Internal nasm flags that should not be changed by the user.
 override NASMFLAGS := \
     -f elf64 \
-    $(patsubst -g,-g -F dwarf,$(NASMFLAGS)) \
-    -Wall
+	-Wall \
+    $(patsubst -g,-g -F dwarf,$(NASMFLAGS))
 
 # Internal linker flags that should not be changed by the user.
 override LDFLAGS += \
