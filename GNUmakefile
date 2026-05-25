@@ -28,10 +28,10 @@ run: $(IMAGE_NAME).iso
 		$(QEMUFLAGS)
 
 .PHONY: run-uefi
-run-uefi: edk2-ovmf $(IMAGE_NAME).iso
+run-uefi: edk2-ovmf-bins $(IMAGE_NAME).iso
 	qemu-system-x86_64 \
 		-M q35 \
-		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf/ovmf-code-x86_64.fd,readonly=on \
+		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf-bins/ovmf-code-x86_64.fd,readonly=on \
 		-cdrom $(IMAGE_NAME).iso \
 		-boot d \
 		$(QEMUFLAGS)
@@ -44,15 +44,15 @@ run-hdd: $(IMAGE_NAME).hdd
 		$(QEMUFLAGS)
 
 .PHONY: run-hdd-uefi
-run-hdd-uefi: edk2-ovmf $(IMAGE_NAME).hdd
+run-hdd-uefi: edk2-ovmf-bins $(IMAGE_NAME).hdd
 	qemu-system-x86_64 \
 		-M q35 \
-		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf/ovmf-code-x86_64.fd,readonly=on \
+		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf-bins/ovmf-code-x86_64.fd,readonly=on \
 		-hda $(IMAGE_NAME).hdd \
 		$(QEMUFLAGS)
 
-edk2-ovmf:
-	curl -L https://github.com/osdev0/edk2-ovmf-nightly/releases/latest/download/edk2-ovmf.tar.gz | gunzip | tar -xf -
+edk2-ovmf-bins:
+	curl -L https://github.com/osdev0/edk2-ovmf-stable-bins/releases/latest/download/edk2-ovmf-bins.tar.gz | gunzip | tar -xf -
 
 limine-binary/limine:
 	rm -rf limine-binary
@@ -108,4 +108,4 @@ clean:
 .PHONY: distclean
 distclean: clean
 	$(MAKE) -C kernel distclean
-	rm -rf limine-binary edk2-ovmf
+	rm -rf limine-binary edk2-ovmf-bins
