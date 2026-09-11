@@ -124,7 +124,7 @@ override CFILES := $(filter %.c,$(SRCFILES))
 override ASFILES := $(filter %.S,$(SRCFILES))
 override NASMFILES := $(filter %.asm,$(SRCFILES))
 override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
-override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
+override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d) $(NASMFILES:.asm=.asm.d))
 
 # Default target. This must come first, before header dependencies.
 .PHONY: all
@@ -151,7 +151,7 @@ obj/%.S.o: %.S GNUmakefile
 # Compilation rules for *.asm (nasm) files.
 obj/%.asm.o: %.asm GNUmakefile
 	mkdir -p "$(dir $@)"
-	nasm $(NASMFLAGS) $< -o $@
+	nasm $(NASMFLAGS) -MD $(@:.o=.d) -MP $< -o $@
 
 # Remove object files and the final executable.
 .PHONY: clean
