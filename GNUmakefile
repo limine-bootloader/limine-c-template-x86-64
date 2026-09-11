@@ -1,6 +1,9 @@
 # Nuke built-in rules.
 .SUFFIXES:
 
+# Delete the target of a failed recipe.
+.DELETE_ON_ERROR:
+
 # Default user QEMU flags. These are appended to the QEMU command calls.
 QEMUFLAGS := -m 2G
 
