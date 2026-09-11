@@ -70,12 +70,21 @@ run-hdd-uefi: edk2-ovmf-bins $(IMAGE_NAME).hdd
 		-hda $(IMAGE_NAME).hdd \
 		$(QEMUFLAGS)
 
-edk2-ovmf-bins:
-	curl -L https://github.com/osdev0/edk2-ovmf-stable-bins/releases/latest/download/edk2-ovmf-bins.tar.gz | gunzip | tar -xf -
+.INTERMEDIATE: edk2-ovmf-bins.tar.gz
+edk2-ovmf-bins.tar.gz:
+	curl -fL -o $@ https://github.com/osdev0/edk2-ovmf-stable-bins/releases/latest/download/edk2-ovmf-bins.tar.gz
 
-limine-binary/limine:
+edk2-ovmf-bins: edk2-ovmf-bins.tar.gz
+	rm -rf edk2-ovmf-bins
+	gunzip < edk2-ovmf-bins.tar.gz | tar -xf -
+
+.INTERMEDIATE: limine-binary.tar.gz
+limine-binary.tar.gz:
+	curl -fL -o $@ https://github.com/Limine-Bootloader/Limine/releases/latest/download/limine-binary.tar.gz
+
+limine-binary/limine: limine-binary.tar.gz
 	rm -rf limine-binary
-	curl -L https://github.com/Limine-Bootloader/Limine/releases/latest/download/limine-binary.tar.gz | gunzip | tar -xf -
+	gunzip < limine-binary.tar.gz | tar -xf -
 	$(MAKE) -C limine-binary \
 		CC="$(HOST_CC)" \
 		CFLAGS="$(HOST_CFLAGS)" \
@@ -127,4 +136,4 @@ clean:
 .PHONY: distclean
 distclean: clean
 	$(MAKE) -C kernel distclean
-	rm -rf limine-binary edk2-ovmf-bins
+	rm -rf limine-binary limine-binary.tar.gz edk2-ovmf-bins edk2-ovmf-bins.tar.gz
