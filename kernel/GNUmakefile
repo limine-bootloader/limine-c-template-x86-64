@@ -109,6 +109,14 @@ override LDFLAGS += \
     --gc-sections \
     -T linker-scripts/x86_64.lds
 
+# Check if the linker supports -no-pie and enable it if it does.
+override LD_HAS_NO_PIE := $(shell ! $(LD) --help 2>/dev/null | grep -qE '(^|[[:space:]])--?no-pie([[:space:]]|$$)'; echo $$?)
+
+ifeq ($(LD_HAS_NO_PIE),1)
+    override LDFLAGS += \
+        -no-pie
+endif
+
 # Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
 override SRCFILES := $(shell find -L src cc-runtime/src -type f 2>/dev/null | LC_ALL=C sort)
