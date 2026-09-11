@@ -7,6 +7,12 @@
 # Default user QEMU flags. These are appended to the QEMU command calls.
 QEMUFLAGS := -m 2G
 
+# Internal QEMU flags that should not be changed by the user.
+override QEMU_MACHINE_FLAGS := \
+    -M q35
+override QEMU_UEFI_FLAGS := \
+    -drive if=pflash,unit=0,format=raw,file=edk2-ovmf-bins/ovmf-code-x86_64.fd,readonly=on
+
 override IMAGE_NAME := template
 
 # User controllable size of the HDD image, in MiB.
@@ -41,7 +47,7 @@ all-hdd: $(IMAGE_NAME).hdd
 .PHONY: run
 run: $(IMAGE_NAME).iso
 	qemu-system-x86_64 \
-		-M q35 \
+		$(QEMU_MACHINE_FLAGS) \
 		-cdrom $(IMAGE_NAME).iso \
 		-boot d \
 		$(QEMUFLAGS)
@@ -49,8 +55,8 @@ run: $(IMAGE_NAME).iso
 .PHONY: run-uefi
 run-uefi: edk2-ovmf-bins $(IMAGE_NAME).iso
 	qemu-system-x86_64 \
-		-M q35 \
-		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf-bins/ovmf-code-x86_64.fd,readonly=on \
+		$(QEMU_MACHINE_FLAGS) \
+		$(QEMU_UEFI_FLAGS) \
 		-cdrom $(IMAGE_NAME).iso \
 		-boot d \
 		$(QEMUFLAGS)
@@ -58,15 +64,15 @@ run-uefi: edk2-ovmf-bins $(IMAGE_NAME).iso
 .PHONY: run-hdd
 run-hdd: $(IMAGE_NAME).hdd
 	qemu-system-x86_64 \
-		-M q35 \
+		$(QEMU_MACHINE_FLAGS) \
 		-hda $(IMAGE_NAME).hdd \
 		$(QEMUFLAGS)
 
 .PHONY: run-hdd-uefi
 run-hdd-uefi: edk2-ovmf-bins $(IMAGE_NAME).hdd
 	qemu-system-x86_64 \
-		-M q35 \
-		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf-bins/ovmf-code-x86_64.fd,readonly=on \
+		$(QEMU_MACHINE_FLAGS) \
+		$(QEMU_UEFI_FLAGS) \
 		-hda $(IMAGE_NAME).hdd \
 		$(QEMUFLAGS)
 
