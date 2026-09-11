@@ -20,6 +20,7 @@ override HDD_CYLINDER_SECTORS := $(shell echo $$(( $(HDD_HEADS) * $(HDD_SECTORS_
 override HDD_PART_START := $(HDD_CYLINDER_SECTORS)
 override HDD_PART_SECTORS := $(shell echo $$(( ($(HDD_SIZE) - 2) * $(HDD_CYLINDER_SECTORS) )))
 override HDD_PART_END := $(shell echo $$(( $(HDD_PART_START) + $(HDD_PART_SECTORS) - 1 )))
+override HDD_PART_OFFSET := $(shell echo $$(( $(HDD_PART_START) * 512 )))
 
 # Toolchain for building the 'limine' executable for the host.
 HOST_CC := cc
@@ -108,12 +109,12 @@ $(IMAGE_NAME).hdd: limine-binary/limine kernel
 	dd if=/dev/zero bs=1M count=0 seek=$(HDD_SIZE) of=$(IMAGE_NAME).hdd
 	PATH=$$PATH:/usr/sbin:/sbin sgdisk $(IMAGE_NAME).hdd -n 1:$(HDD_PART_START):$(HDD_PART_END) -t 1:ef00 -m 1
 	./limine-binary/limine bios-install $(IMAGE_NAME).hdd
-	mformat -i $(IMAGE_NAME).hdd@@1M -T $(HDD_PART_SECTORS) -h $(HDD_HEADS) -s $(HDD_SECTORS_PER_TRACK) ::
-	mmd -i $(IMAGE_NAME).hdd@@1M ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine
-	mcopy -i $(IMAGE_NAME).hdd@@1M kernel/bin/kernel ::/boot
-	mcopy -i $(IMAGE_NAME).hdd@@1M limine.conf limine-binary/limine-bios.sys ::/boot/limine
-	mcopy -i $(IMAGE_NAME).hdd@@1M limine-binary/BOOTX64.EFI ::/EFI/BOOT
-	mcopy -i $(IMAGE_NAME).hdd@@1M limine-binary/BOOTIA32.EFI ::/EFI/BOOT
+	mformat -i $(IMAGE_NAME).hdd@@$(HDD_PART_OFFSET) -T $(HDD_PART_SECTORS) -h $(HDD_HEADS) -s $(HDD_SECTORS_PER_TRACK) ::
+	mmd -i $(IMAGE_NAME).hdd@@$(HDD_PART_OFFSET) ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine
+	mcopy -i $(IMAGE_NAME).hdd@@$(HDD_PART_OFFSET) kernel/bin/kernel ::/boot
+	mcopy -i $(IMAGE_NAME).hdd@@$(HDD_PART_OFFSET) limine.conf limine-binary/limine-bios.sys ::/boot/limine
+	mcopy -i $(IMAGE_NAME).hdd@@$(HDD_PART_OFFSET) limine-binary/BOOTX64.EFI ::/EFI/BOOT
+	mcopy -i $(IMAGE_NAME).hdd@@$(HDD_PART_OFFSET) limine-binary/BOOTIA32.EFI ::/EFI/BOOT
 
 .PHONY: clean
 clean:
