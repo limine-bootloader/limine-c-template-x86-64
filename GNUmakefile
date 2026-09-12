@@ -24,7 +24,8 @@ override HDD_HEADS := 64
 override HDD_SECTORS_PER_TRACK := 32
 override HDD_CYLINDER_SECTORS := $(shell echo $$(( $(HDD_HEADS) * $(HDD_SECTORS_PER_TRACK) )))
 
-# Internal HDD partition layout that should not be changed by the user. The
+# Internal HDD partition layout that should not be changed by the user. sgdisk
+# lays the partition out as GPT before converting the table to MBR, so the
 # first and last cylinders are left to the GPT structures.
 override HDD_PART_START := $(HDD_CYLINDER_SECTORS)
 override HDD_PART_SECTORS := $(shell echo $$(( ($(HDD_SIZE) - 2) * $(HDD_CYLINDER_SECTORS) )))
